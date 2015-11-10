@@ -15,37 +15,37 @@ b = 1./3000
 c = 1./100
 d = 0.005
 
-Fe = a / c 
-Re = b / (c * d)
+# Equilibrium
+F_e = a / c 
+R_e = b / (c * d)
 
-class Population:
-	def __init__(self, R, F, dt):
-		self.R = R
-		self.F = F
-		self.t = 0.
-		self.dt = dt
-		
-	def up(self):
-		H  = self.R * self.F * c
-		dR = self.dt * ( self.R * a - H )
-		dF = self.dt * ( H * d - self.F * b )
-		self.R += dR
-		self.F += dF
-		self.t += self.dt
+# Time quantum
+dt = .1
 
-import matplotlib.pylab as pl
+def population_up(R, F):
+	catched = R * F * c
+	born = catched * d
+	vR = R * a - catched
+	vF = born - F * b
+	return R + vR * dt, F + vF * dt
 
-p = Population(Re+1, Fe, 0.1)
-t, R, F = [], [], []
-while p.t < 10000:
-	p.up()
-	t.append(p.t)
-	R.append(p.R)
-	F.append(p.F)
+import matplotlib.pyplot as pl
 
-pl.plot(t, R, label='rabbits')
-pl.plot(t, F, label='foxes')
-#pl.plot(R, F)
+R = R_e + 1
+F = F_e
+t = 0.
+R_ = []
+F_ = []
+t_ = []
+while t < 10000:
+	R, F = population_up(R, F)
+	R_.append(R)
+	F_.append(F)
+	t_.append(t)
+	t += dt
+
+pl.plot(t_, R_, label='rabbits')
+pl.plot(t_, F_, label='foxes')
 pl.legend()
 pl.show()
 
