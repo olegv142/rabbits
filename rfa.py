@@ -13,18 +13,24 @@
 # d - eaten rabbit to fox born coefficient
 # A - adult age
 #
+# Considering environmental saturation:
+# dR  = dt * [ R * a * (1 - R/Rs) - R * Fa * c ]
+#
+# Rs - saturated population
 
 a = 1./20
 b = 1./3000
 c = 1./100
 d = 0.005
 
-A = 20.
+A = 100.
 
 # Equilibrium
 Fa_e = a / c
 Fc_e = A * a * b / c
 R_e = b * (1 + A * b) / (c * d)
+
+Rs = 100 * R_e
 
 # Time quantum
 dt = .1
@@ -32,7 +38,7 @@ dt = .1
 def population_up(R, Fc, Fa):
 	catched = R * Fa * c
 	born = catched * d
-	vR = R * a - catched
+	vR = R * a * (1 - R / Rs) - catched
 	vFc = born - Fc * b - Fc / A
 	vFa = Fc / A - Fa * b
 	return R + vR * dt, Fc + vFc * dt, Fa + vFa * dt
@@ -47,7 +53,7 @@ R_  = []
 Fc_ = []
 Fa_ = []
 t_  = []
-while t < 40000:
+while t < 100000:
 	R, Fc, Fa = population_up(R, Fc, Fa)
 	R_.append(R)
 	Fc_.append(Fc)
