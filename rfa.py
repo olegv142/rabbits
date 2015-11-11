@@ -24,13 +24,12 @@ c = 1./100
 d = 0.005
 
 A = 100.
+Rs = 1000.
 
 # Equilibrium
-Fa_e = a / c
-Fc_e = A * a * b / c
 R_e = b * (1 + A * b) / (c * d)
-
-Rs = 100 * R_e
+Fa_e = (a / c) * (1 - R_e / Rs)
+Fc_e = A * b * Fa_e
 
 # Time quantum
 dt = .1
