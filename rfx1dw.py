@@ -45,7 +45,7 @@ def population_up(R, F):
 	catched = c * F * (R - R0) * Rc / (R + Rc)
 	born = d * catched
 	vR = a * R * (1 - R/Rs) - catched + .2 * migration_rate(R)
-	vF = born - b * F
+	vF = born - b * F + .1 * migration_rate(F)
 	return R + vR * dt, F + vF * dt
 
 import matplotlib.pyplot as pl
