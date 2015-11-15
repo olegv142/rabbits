@@ -1,48 +1,51 @@
+﻿# -*- coding: utf-8 -*-
 #
-# Rabbit-fox population model (Volterra model) with
-# logistic growth, covered rabbits and hunting saturation
-#
-# H  = c * F * (R - R0) * Rc / (R + Rc)
-# dR = dt * [ a * (R * R / (R + R1)) * (1 - R/Rs) - H ]
-# dF = dt * [ d * H - b * F ]
-#
-# a  - rabbit growth
-# b  - fox death
-# c  - hunting efficiency
-# d  - eaten rabbit to fox born coefficient
-# R0 - covered rabbits population
-# R1 - lonely rabbits threshold
-# Rc - hunting saturation
-# Rs - saturated rabbits population
+# Лисы - кролики
+# R - популяция кроликов
+# F - популяция лис
+# Скорость рождения кроликов:
+#  B(R) = a * (R / (1 + R1/R)) * (1 - R/Rs)
+#    a  - коэффициент пропорциональности
+#    R1 - порог одиночества
+#    Rs - порог насыщения популяции (емкость среды)
+# Скорость отлова кроликов лисами:
+#  H(R,F) = c * F / (1 + Rh / (R - R0))
+#    c  - коэффициент пропорциональности 
+#    Rh - порог насыщения хищников
+#    R0 - порог неуловимости
+# Скорости изменения популяций:
+#  R' = B - H
+#  F' = d * H - b * F
+#    d - коэффициент конверсии съеденных кроликов в новых лис
+#    b - смертность лис
 #
 
-a = 1./20
-b = 1./3000
-c = 1./100
-d = 0.005
-R0 = .1
-R1 = 1.
-Rc = 50.
-Rs = 100.
+a = 1./20    # один кролик рождается в среднем раз в 20 дней
+b = 1./3000  # лиса живет в среднем 3000 дней
+c = 1./2     # лисе хватает одного кролика на 2 дня
+d = 1./200   # чтобы выросла новая лиса, нужно съесть 200 кроликов
+R0 = .1      # этих кроликов невозможно поймать
+R1 = 1.      # при меньшем количестве крольчихе трудно найти партнера
+Rh = 50.     # при таком количестве кроликов происходит насыщение хищников
+Rs = 100.    # столько кроликов выедают всю траву, и популяция перестает расти
 
 # Equilibrium
-R_ = b / (c * d)
-R_e = Rc * (R0 + R_) / (Rc - R_)
-F_e = (a / c) * R_e * R_e * (1 - R_e/Rs) * (R_e + Rc) / ((R_e + R1) * (R_e - R0) * Rc)
+R_e = R0 + Rh / (d*c/b - 1)
+F_e = (a/c) * R_e * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
 
 # Time quantum
 dt = .1
 
 def population_up(R, F):
-	catched = c * F * (R - R0) * Rc / (R + Rc)
-	born = d * catched
-	vR = a * R * R * (1 - R/Rs) / (R + R1) - catched
-	vF = born - b * F
+	B = a * (R / (1 + R1/R)) * (1 - R/Rs)
+	H = c * F / (1 + Rh / (R - R0))
+	vR = B - H
+	vF = d * H - b * F
 	return R + vR * dt, F + vF * dt
 
 import matplotlib.pyplot as pl
 
-R = R_e + .1
+R = R_e + 0.001
 F = F_e
 t = 0.
 R_ = []
