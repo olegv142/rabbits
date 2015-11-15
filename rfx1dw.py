@@ -46,8 +46,8 @@ def migration_rate(P):
 def population_up(R, F):
 	catched = c * F * (R - R0) * Rc / (R + Rc)
 	born = d * catched
-	vR = a * R * R * (1 - R/Rs) / (R + R1) - catched + .1 * migration_rate(R)
-	vF = born - b * F + .1 * migration_rate(F)
+	vR = a * R * R * (1 - R/Rs) / (R + R1) - catched + .01 * migration_rate(R)
+	vF = born - b * F + .01 * migration_rate(F)
 	return R + vR * dt, F + vF * dt
 
 import matplotlib.pyplot as pl
@@ -84,7 +84,8 @@ def run(i):
 	lF.set_data(I, F)
 	ax.set_title(str(int(n*dt)))
 
-ani = animation.FuncAnimation(fig, run, init_func=init, interval=0)
+ani = animation.FuncAnimation(fig, run, init_func=init, interval=0, frames=10000)
+ani.save('rf1d_waves.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 pl.show()
 
 
