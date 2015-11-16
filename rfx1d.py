@@ -22,6 +22,7 @@
 
 import sys
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as pl
 import matplotlib.animation as animation
 
@@ -97,9 +98,10 @@ def run_simulation():
 	context.R = rabbits(arg)
 	context.F = np.array([F_e for i in range(N)])
 
+	matplotlib.rc('font', family='Arial')
 	fig, ax = pl.subplots()
-	lR, = ax.plot(I, context.R, label='rabbits')
-	lF, = ax.plot(I, context.F, label='foxes')
+	lR, = ax.plot(I, context.R, label=u'кролики')
+	lF, = ax.plot(I, context.F, label=u'лисы')
 	ax.set_xlim(0, N)
 	ax.set_ylim(0, Rs)
 	ax.legend()
