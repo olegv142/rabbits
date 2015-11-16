@@ -56,14 +56,17 @@ def M(P):
 	return .5 * P[Left] + .5 * P[Right] - P
 
 def population_up(R, F):
-	B = a * (R / (1 + R1/R)) * (1 - R/Rs)
-	H = c * F / (1 + Rh / (R - R0))
+	B = a * (R * R / (R + R1)) * (1 - R/Rs)
+	H = c * F * (R - R0) / (R - R0 + Rh)
 	vR = B - H + Vr * M(R)
 	vF = d * H - b * F + Vf * M(F)
 	return R + vR * dt, F + vF * dt
 
-def single_peak(arg):
-	return np.array([2*R_e if N/2-5 <= i < N/2+5 else R_e for i in range(N)])
+def single_peak(w):
+	return np.array([2*R_e if N/2-w/2 <= i < N/2+w/2 else R_e for i in range(N)])
+
+def island((population, w)):
+	return np.array([population if N/2-w/2 <= i < N/2+w/2 else 0 for i in range(N)])
 
 def peaks((per, l, r)):
 	return np.array([2*R_e if l[(i/per) % len(l)] <= (i%per) < r[(i/per) % len(r)] else R_e for i in range(N)])
@@ -72,13 +75,17 @@ def random(seed):
 	np.random.seed(seed)
 	return R_e * (1 + .1 * np.random.randn(N))
 
+def foxes(population):
+	return np.array([population for i in range(N)])
+
 presets = {
-	# name: (Vr, Vf, random_seed)
-	'soliton'      : (.1,  1.,  random, 0),
-	'waves'        : (.1,  1.,  single_peak, None),
-	'struct-flash' : (.02, 1.,  random, 1),
-	'struct'       : (.025, 2., single_peak, None),
-	'dyn-struct'   : (.025, 1., peaks, (55, (0, 10), (10, 20))),
+	# name: (Vr, Vf, rabbits_init, rabbits_init_arg, foxes_init, foxes_init_arg)
+	'soliton'      : (.1,  1.,  random, 0,       foxes, F_e),
+	'waves'        : (.1,  1.,  single_peak, 10, foxes, F_e),
+	'struct-flash' : (.02, 1.,  random, 1,       foxes, F_e),
+	'struct'       : (.025, 2., single_peak, 10, foxes, F_e),
+	'dyn-struct'   : (.025, 1., peaks, (55, (0, 10), (10, 20)), foxes, F_e),
+	'no-foxes'     : (.1, 0.,   island, (.1, 10), foxes, 0.),
 }
 
 def run_simulation():
@@ -87,23 +94,24 @@ def run_simulation():
 		t = 0.
 		n = 0
 
-	rabbits, arg = single_peak, None
+	rinit, rarg = single_peak, 10
+	finit, farg = foxes, F_e
 	if len(sys.argv) > 1:
 		global Vr, Vf
 		preset = sys.argv[1]
 		print 'Using preset', preset
-		Vr, Vf, rabbits, arg = presets[preset]
+		Vr, Vf, rinit, rarg, finit, farg = presets[preset]
 
-	print 'Vr=%f, Vf=%f' % (Vr, Vf)
-	context.R = rabbits(arg)
-	context.F = np.array([F_e for i in range(N)])
+	print 'Vr=%f, Vf=%f, %s(%s), %s(%s)' % (Vr, Vf, rinit.__name__, rarg, finit.__name__, farg)
+	context.R = rinit(rarg)
+	context.F = finit(farg)
 
 	matplotlib.rc('font', family='Arial')
 	fig, ax = pl.subplots()
 	lR, = ax.plot(I, context.R, label=u'кролики')
 	lF, = ax.plot(I, context.F, label=u'лисы')
 	ax.set_xlim(0, N)
-	ax.set_ylim(0, Rs)
+	ax.set_ylim(0, Rs * 1.02)
 	ax.legend()
 
 	def run(i):
