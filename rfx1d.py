@@ -42,7 +42,7 @@ F_e = (a/c) * R_e * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
 dt = .1
 
 # Simulation array parameters 
-N = 1000
+N = 990
 I = range(N)
 Left  = np.array(I[-1:]+I[:-1])
 Right = np.array(I[1:]+I[:1])
@@ -61,47 +61,48 @@ def population_up(R, F):
 	vF = d * H - b * F + Vf * M(F)
 	return R + vR * dt, F + vF * dt
 
+def single_peak(arg):
+	return np.array([2*R_e if N/2-5 <= i < N/2+5 else R_e for i in range(N)])
+
+def peaks((per, l, r)):
+	return np.array([2*R_e if l[(i/per) % len(l)] <= (i%per) < r[(i/per) % len(r)] else R_e for i in range(N)])
+
+def random(seed):
+	np.random.seed(seed)
+	return R_e * (1 + .1 * np.random.randn(N))
+
 presets = {
 	# name: (Vr, Vf, random_seed)
-	'soliton'      : (.1,  1., 0),
-	'waves'        : (.05, .05, None),
-	'struct-flash' : (.02, 1., 1),
-	'struct'       : (.01, 1., None)
+	'soliton'      : (.1,  1.,  random, 0),
+	'waves'        : (.1,  1.,  single_peak, None),
+	'struct-flash' : (.02, 1.,  random, 1),
+	'struct'       : (.025, 2., single_peak, None),
+	'dyn-struct'   : (.025, 1., peaks, (55, (0, 10), (10, 20))),
 }
 
 def run_simulation():
 	class context:
 		R, F = None, None
-		y_max = None
 		t = 0.
 		n = 0
 
-	seed = None
+	rabbits, arg = single_peak, None
 	if len(sys.argv) > 1:
 		global Vr, Vf
 		preset = sys.argv[1]
 		print 'Using preset', preset
-		Vr, Vf, seed = presets[preset]
+		Vr, Vf, rabbits, arg = presets[preset]
 
+	print 'Vr=%f, Vf=%f' % (Vr, Vf)
+	context.R = rabbits(arg)
 	context.F = np.array([F_e for i in range(N)])
-	if seed is None:
-		print 'Vr=%f, Vf=%f' % (Vr, Vf)
-		context.R = np.array([2*R_e if N/2-5 <= i < N/2+5 else R_e for i in range(N)])
-	else:
-		print 'Vr=%f, Vf=%f, seed=%s' % (Vr, Vf, seed)
-		np.random.seed(seed)
-		context.R = R_e * (1 + .1 * np.random.randn(N))
 
 	fig, ax = pl.subplots()
 	lR, = ax.plot(I, context.R, label='rabbits')
 	lF, = ax.plot(I, context.F, label='foxes')
-
-	context.y_max = max(context.R)
-
-	def init():
-		ax.set_xlim(0, N)
-		ax.set_ylim(0, context.y_max)
-		ax.legend()
+	ax.set_xlim(0, N)
+	ax.set_ylim(0, Rs)
+	ax.legend()
 
 	def run(i):
 		for i in range(100):
@@ -109,16 +110,11 @@ def run_simulation():
 			context.t += dt
 			context.n += 1
 
-		Rmax = max(context.R)
-		if context.y_max < Rmax:
-			context.y_max = Rmax
-			ax.set_ylim(0, context.y_max)
-
 		lR.set_data(I, context.R)
 		lF.set_data(I, context.F)
 		ax.set_title(str(int(context.n*dt)))
 
-	ani = animation.FuncAnimation(fig, run, init_func=init, interval=0)
+	ani = animation.FuncAnimation(fig, run, interval=0)
 	pl.show()
 
 if __name__ == '__main__':
