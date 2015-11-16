@@ -97,7 +97,12 @@ def run_simulation():
 	rinit, rarg = single_peak, 10
 	finit, farg = foxes, F_e
 	title = ''
-	args = {'step':10.}
+	args = {
+		'step':10.,
+		'video':None,
+		'fps':30,
+		'frames':10000,
+	}
 
 	if len(sys.argv) > 1:
 		global Vr, Vf
@@ -110,7 +115,8 @@ def run_simulation():
 		for arg in sys.argv[2:]:
 			exec(arg, args)
 
-	print 'Vr=%f, Vf=%f, %s(%s), %s(%s)' % (Vr, Vf, rinit.__name__, rarg, finit.__name__, farg)
+	print 'Vr=%f, Vf=%f, %s(%s), %s(%s), step=%f' % (Vr, Vf, rinit.__name__, rarg, finit.__name__, farg, args['step'])
+
 	context.R = rinit(rarg)
 	context.F = finit(farg)
 
@@ -132,8 +138,13 @@ def run_simulation():
 		lF.set_data(I, context.F)
 		ax.set_title(u'%s  %d дней' % (title, context.n*dt))
 
-	ani = animation.FuncAnimation(fig, run, interval=0)
-	pl.show()
+	if args['video']:
+		print "save video to '%s' at %d fps, %d frames" % (args['video'], args['fps'], args['frames'])
+		ani = animation.FuncAnimation(fig, run, interval=0, frames=args['frames'])
+		ani.save(args['video'], fps=args['fps'], extra_args=['-vcodec', 'libx264'])
+	else:
+		ani = animation.FuncAnimation(fig, run, interval=0)
+		pl.show()
 
 if __name__ == '__main__':
 	run_simulation()
