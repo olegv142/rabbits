@@ -96,6 +96,7 @@ def run_simulation():
 
 	rinit, rarg = single_peak, 10
 	finit, farg = foxes, F_e
+	preset = ''
 	if len(sys.argv) > 1:
 		global Vr, Vf
 		preset = sys.argv[1]
@@ -122,7 +123,7 @@ def run_simulation():
 
 		lR.set_data(I, context.R)
 		lF.set_data(I, context.F)
-		ax.set_title(str(int(context.n*dt)))
+		ax.set_title(u'%s  %d дней' % (preset, context.n*dt))
 
 	ani = animation.FuncAnimation(fig, run, interval=0)
 	pl.show()
