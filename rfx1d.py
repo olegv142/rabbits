@@ -96,12 +96,19 @@ def run_simulation():
 
 	rinit, rarg = single_peak, 10
 	finit, farg = foxes, F_e
-	preset = ''
+	title = ''
+	args = {'step':10.}
+
 	if len(sys.argv) > 1:
 		global Vr, Vf
 		preset = sys.argv[1]
 		print 'Using preset', preset
 		Vr, Vf, rinit, rarg, finit, farg = presets[preset]
+		title = '[' + preset + ']'
+
+	if len(sys.argv) > 2:
+		for arg in sys.argv[2:]:
+			exec(arg, args)
 
 	print 'Vr=%f, Vf=%f, %s(%s), %s(%s)' % (Vr, Vf, rinit.__name__, rarg, finit.__name__, farg)
 	context.R = rinit(rarg)
@@ -116,14 +123,14 @@ def run_simulation():
 	ax.legend()
 
 	def run(i):
-		for i in range(100):
+		for i in range(int(args['step']/dt)):
 			context.R, context.F = population_up(context.R, context.F)
 			context.t += dt
 			context.n += 1
 
 		lR.set_data(I, context.R)
 		lF.set_data(I, context.F)
-		ax.set_title(u'%s  %d дней' % (preset, context.n*dt))
+		ax.set_title(u'%s  %d дней' % (title, context.n*dt))
 
 	ani = animation.FuncAnimation(fig, run, interval=0)
 	pl.show()
