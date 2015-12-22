@@ -37,7 +37,7 @@ Rs = 100.    # столько кроликов выедают всю траву,
 
 # Equilibrium
 R_e = R0 + Rh / (d*c/b - 1)
-F_e = (a/2*c) * R_e * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
+F_e = (a/c) * (R_e/2) * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
 
 # Time quantum
 dt = .1
