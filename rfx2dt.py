@@ -43,20 +43,42 @@ F_e = (a/c) * (R_e/2) * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
 dt = .5
 
 # Simulation array parameters 
-N = 25  # height, first index
-M = 201 # width, second index
+N = 51  # height, first index
+M = 501 # width, second index
+S = 10  # slope factor
 
-j = range(M)
+Area = [[True]*M for i in range(N)]
+for i in range(N):
+	for j in range((i+1)*S, M):
+		Area[i][j] = False
 
-I = [[i]*M for i in range(N)]
-Dn = I[-1:]+I[:-1]
-Up = I[1:]+I[:1]
+Area = np.array(Area)
 
-J = [j for i in range(N)]
-Le = [j[-1:]+j[:-1] for i in range(N)]
-Rt = [j[1:]+j[:1] for i in range(N)]
+I,  J  = np.empty((N,M), dtype=np.int), np.empty((N,M), dtype=np.int)
+Dn, Up = np.empty((N,M), dtype=np.int), np.empty((N,M), dtype=np.int)
+Le, Rt = np.empty((N,M), dtype=np.int), np.empty((N,M), dtype=np.int)
 
-Dn, Up, Le, Rt = np.array(Dn), np.array(Up), np.array(Le), np.array(Rt)
+# Use mirror boundary conditions
+for i in range(N):
+	for j in range(M):
+		I[i,j] = i
+		J[i,j] = j
+		if Area[i,j]:
+			Dn[i,j] = max(i - 1, 0)
+			Up[i,j] = min(i + 1, N-1)
+			Le[i,j] = max(j - 1, 0)
+			Rt[i,j] = min(j + 1, M-1)
+			if not Area[Dn[i,j],j]:
+				Dn[i,j] = i
+			if not Area[Up[i,j],j]:
+				Up[i,j] = i
+			if not Area[i,Le[i,j]]:
+				Le[i,j] = j
+			if not Area[i,Rt[i,j]]:
+				Rt[i,j] = j
+		else:
+			Dn[i,j] = Up[i,j] = i
+			Le[i,j] = Rt[i,j] = j
 
 # Migration speed parameters
 Vr = 0.01
@@ -74,8 +96,10 @@ def population_up(R, F):
 
 dR = 1.
 R = R_e * np.ones((N,M))
-R[N/2,M/2] = R_e + dR
 F = F_e * np.ones((N,M))
+R[np.logical_not(Area)] = Rs
+F[np.logical_not(Area)] = 0
+R[N-1,M-1] = R_e + dR
 t = 0
 n = 0
 
@@ -103,7 +127,7 @@ def run_simulation():
 			t += dt
 			n += 1
 		im.set_data(R)
-		ax.set_title(u'%d дней' % (n*dt))
+		ax.set_title(u'%d' % (n*dt))
 
 	if args['video']:
 		print "save video to '%s' at %d fps, %d frames" % (args['video'], args['fps'], args['frames'])
