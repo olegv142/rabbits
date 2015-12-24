@@ -43,9 +43,9 @@ F_e = (a/c) * (R_e/2) * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
 dt = .5
 
 # Simulation array parameters 
-N = 51  # height, first index
-M = 501 # width, second index
-S = 10  # slope factor
+N = 32  # height, first index
+M = 450 # width, second index
+S = 15  # slope factor
 
 Area = [[True]*M for i in range(N)]
 for i in range(N):
@@ -118,6 +118,8 @@ def run_simulation():
 	matplotlib.rc('font', family='Arial')
 	fig, ax = pl.subplots()
 	im = ax.imshow(R, vmin=0, vmax=Rs)
+	ax.get_xaxis().set_visible(False)
+	ax.get_yaxis().set_visible(False)
 	pl.colorbar(im, orientation='horizontal')
 
 	def run(i):
