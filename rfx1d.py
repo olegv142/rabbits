@@ -98,7 +98,7 @@ def run_simulation():
 	finit, farg = foxes, F_e
 	title = ''
 	args = {
-		'step':10.,
+		'step':50.,
 		'video':None,
 		'fps':30,
 		'frames':10000,
