@@ -78,9 +78,19 @@ R[N/2,M/2] = R_e + dR
 F = F_e * np.ones((N,M))
 t = 0
 n = 0
-step = 10
 
 def run_simulation():
+	args = {
+		'step':50.,
+		'video':None,
+		'fps':30,
+		'frames':10000,
+	}
+
+	if len(sys.argv) > 1:
+		for arg in sys.argv[1:]:
+			exec(arg, args)
+
 	matplotlib.rc('font', family='Arial')
 	fig, ax = pl.subplots()
 	im = ax.imshow(R, vmin=0, vmax=Rs)
@@ -88,15 +98,20 @@ def run_simulation():
 
 	def run(i):
 		global R, F, t, n
-		for i in range(int(step/dt)):
+		for i in range(int(args['step']/dt)):
 			R, F = population_up(R, F)
 			t += dt
 			n += 1
 		im.set_data(R)
 		ax.set_title(u'%d дней' % (n*dt))
 
-	ani = animation.FuncAnimation(fig, run, interval=0)
-	pl.show()
+	if args['video']:
+		print "save video to '%s' at %d fps, %d frames" % (args['video'], args['fps'], args['frames'])
+		ani = animation.FuncAnimation(fig, run, interval=0, frames=args['frames'])
+		ani.save(args['video'], fps=args['fps'], extra_args=['-vcodec', 'libx264'])
+	else:
+		ani = animation.FuncAnimation(fig, run, interval=0)
+		pl.show()
 
 if __name__ == '__main__':
 	run_simulation()
