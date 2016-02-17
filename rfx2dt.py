@@ -105,10 +105,10 @@ n = 0
 
 def run_simulation():
 	args = {
-		'step':50.,
+		'step':200.,
 		'video':None,
 		'fps':30,
-		'frames':10000,
+		'frames':1000,
 	}
 
 	if len(sys.argv) > 1:

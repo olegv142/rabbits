@@ -43,8 +43,8 @@ F_e = (a/c) * (R_e/2) * (1 - R_e/Rs) * (1 + Rh/(R_e - R0)) / (1 + R1/R_e)
 dt = .5
 
 # Simulation array parameters 
-N = 25  # height, first index
-M = 201 # width, second index
+N = 101 # height, first index
+M = 101 # width, second index
 
 j = range(M)
 
@@ -59,7 +59,7 @@ Rt = [j[1:]+j[:1] for i in range(N)]
 Dn, Up, Le, Rt = np.array(Dn), np.array(Up), np.array(Le), np.array(Rt)
 
 # Migration speed parameters
-Vr = 0.01
+Vr = 0.02
 Vf = 1.
 
 def Mig(P):
@@ -74,14 +74,16 @@ def population_up(R, F):
 
 dR = 1.
 R = R_e * np.ones((N,M))
-R[N/2,M/2] = R_e + dR
 F = F_e * np.ones((N,M))
 t = 0
 n = 0
 
 def run_simulation():
+	global R
 	args = {
-		'step':50.,
+		'seed':0,
+		'seed-area':10,
+		'step':100.,
 		'video':None,
 		'fps':30,
 		'frames':10000,
@@ -90,6 +92,10 @@ def run_simulation():
 	if len(sys.argv) > 1:
 		for arg in sys.argv[1:]:
 			exec(arg, args)
+
+	seed, area = args['seed'], args['seed-area']
+	np.random.seed(seed)
+	R[N/2-area:N/2+area+1,M/2-area:M/2+area+1] += dR*np.random.randn(1+2*area,1+2*area)
 
 	matplotlib.rc('font', family='Arial')
 	fig, ax = pl.subplots()

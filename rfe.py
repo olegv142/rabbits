@@ -73,7 +73,7 @@ def plot_evolution(T):
 	pl.legend()
 	pl.xlabel(u'дни')
 	pl.ylabel(u'численность популяции')
-	pl.title(u'эволюция после малого отклонения от равновесия')
+	#pl.title(u'эволюция после малого отклонения от равновесия')
 	pl.show()
 
 def plot_equlibrium():
@@ -91,7 +91,7 @@ def plot_equlibrium():
 	pl.legend()
 	pl.xlabel(u'популяция кроликов')
 	pl.ylabel(u'скорость рождения / отлова кроликов')
-	pl.title(u'неустойчивое равновесие')
+	#pl.title(u'неустойчивое равновесие')
 	pl.show()
 
 plot_equlibrium()
